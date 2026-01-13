@@ -7,10 +7,10 @@ void twofish_encrypt_block(Twofish_ctx *ctx, const uint8_t plain[16], uint8_t ci
   for (int i = 0; i < 4; i++) {
     // prepare a word
     R[i] = (
-       ((uint32_t) plain[i*4]) |
-       ((uint32_t) plain[i*4 + 1] << 8 ) |
-       ((uint32_t) plain[i*4 + 2] << 16) |
-       ((uint32_t) plain[i*4 + 3] << 24) );
+       ((uint32_t) plain[i * 4]) |
+       ((uint32_t) plain[i * 4 + 1] << 8 ) |
+       ((uint32_t) plain[i * 4 + 2] << 16) |
+       ((uint32_t) plain[i * 4 + 3] << 24) );
 
     // key whitening
     R[i] ^= ctx->exp_key[i];
@@ -24,7 +24,7 @@ void twofish_encrypt_block(Twofish_ctx *ctx, const uint8_t plain[16], uint8_t ci
     temp0 += temp1;
     temp1 += temp0;
 
-    // modulo add key
+    // modulo add round key
     temp0 += ctx->exp_key[2 * i + 8];
     temp1 += ctx->exp_key[2 * i + 9];
 
@@ -55,5 +55,58 @@ void twofish_encrypt_block(Twofish_ctx *ctx, const uint8_t plain[16], uint8_t ci
   }
 }
 
+void twofish_decrypt_block(Twofish_ctx *ctx, const uint8_t cipher[16], uint8_t plain[16]) {
+  uint32_t R[4];
 
+  for (int i = 0; i < 4; i++) {
+     // prepare a word
+     R[i] = (
+       ((uint32_t) cipher[i * 4]) |
+       ((uint32_t) cipher[i * 4 + 1] << 8 ) |
+       ((uint32_t) cipher[i * 4 + 2] << 16) |
+       ((uint32_t) cipher[i * 4 + 3] << 24) );
+
+    // key whitening
+    R[i] ^= ctx->exp_key[i+4];
+  }
+
+  // 16 reverse rounds
+  for (int i = 15; i > -1; i--) {
+    uint32_t temp0 = g_func(R[0], ctx->sbox);
+    uint32_t temp1 = g_func(ROL32(R[1], 8), ctx->sbox);
+
+    // PHT
+    temp0 += temp1;
+    temp1 += temp0;
+
+    // modulo add round keys
+    temp0 += ctx->exp_key[2 * i + 8];
+    temp1 += ctx->exp_key[2 * i + 9];
+
+    // undo the xor roation and apply rotations
+    temp0 = ROL32(R[2], 1) ^ temp0;
+    temp1 = ROR32(R[3] ^ temp1, 1);
+
+    // swap
+    if (i > 0) {
+      R[2] = R[0];
+      R[3] = R[1];
+      R[0] = temp0;
+      R[1] = temp1;
+    } else {
+      R[2] = temp0;
+      R[3] = temp1;
+    }
+  }
+
+  // key whitening
+  for (int i = 0; i < 4; i++) {
+    R[i] ^= ctx->exp_key[i];
+
+    plain[i * 4]     = (uint8_t)(R[i] & 0xFF);
+    plain[i * 4 + 1] = (uint8_t)((R[i] >> 8) & 0xFF);
+    plain[i * 4 + 2] = (uint8_t)((R[i] >> 16) & 0xFF);
+    plain[i * 4 + 3] = (uint8_t)((R[i] >> 24) & 0xFF);
+  }
+}
 
