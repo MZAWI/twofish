@@ -68,7 +68,7 @@ void key_schedule(Twofish_ctx *ctx, uint8_t key[]) {
   // the expanded key words
   for (int i = 0; i < 20; i++) {
     uint32_t A = h_func(2 * i * p, M_e, k);
-    uint32_t B = h_func((2i + 1) * p, M_o, k);
+    uint32_t B = h_func((2 * i + 1) * p, M_o, k);
 
     B = ROL32(B, 8);
 
