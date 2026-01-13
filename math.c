@@ -109,10 +109,60 @@ uint32_t h_func(uint32_t X, const uint32_t L[], int k) {
   ((uint32_t) Z[3] << 24) );
 }
 
+uint32_t h_lane(uint8_t x, int lane, const uint32_t L[], int k) {
+    uint8_t l[4][4];
+    for (int i = 0; i < k; i++) {
+        l[i][0] = (uint8_t)(L[i] & 0xFF);
+        l[i][1] = (uint8_t)((L[i] >> 8) & 0xFF);
+        l[i][2] = (uint8_t)((L[i] >> 16) & 0xFF);
+        l[i][3] = (uint8_t)((L[i] >> 24) & 0xFF);
+    }
 
+    uint8_t y = x;
 
+    // Apply q-permutations and XORs based on the lane index
+    if (k == 4) {
+        if (lane == 0 || lane == 3) 
+          y = q_perm(y, q1) ^ l[3][lane];
+        else 
+          y = q_perm(y, q0) ^ l[3][lane];
+    }
+    if (k >= 3) {
+        if (lane == 0 || lane == 1) 
+          y = q_perm(y, q1) ^ l[2][lane];
+        else 
+          y = q_perm(y, q0) ^ l[2][lane];
+    }
 
+    // Stages k=2 and k=1 (always present)
+    switch (lane) {
+    case (0):
+      y = q_perm(q_perm(q_perm(y, q0) ^ l[1][0], q0) ^ l[0][0], q1);
+      break;
+    case (1):
+      y = q_perm(q_perm(q_perm(y, q1) ^ l[1][1], q0) ^ l[0][1], q0);
+      break;
+    case (2):
+      y = q_perm(q_perm(q_perm(y, q0) ^ l[1][2], q1) ^ l[0][2], q1);
+      break;
+    case (3):
+      y = q_perm(q_perm(q_perm(y, q1) ^ l[1][3], q1) ^ l[0][3], q0);
+      break;
+    }
 
+    // Multiply the single resulting byte by single column of the MDS matrix
+    uint32_t result = 0;
+    for (int i = 0; i < 4; i++) {
+        result ^= ((uint32_t)gf_mult(MDS[i][lane], y, MDS_POLYNOMIAL)) << (i * 8);
+    }
+    return result;
+}
 
-
-
+uint32_t g_func(uint32_t X, uint32_t sbox[4][256]) {
+  return (
+    sbox[0][X & 0xFF] ^
+    sbox[1][(X >> 8) & 0xFF] ^
+    sbox[2][(X >> 16) & 0xFF] ^
+    sbox[3][(X >> 24) & 0xFF]
+  );
+}

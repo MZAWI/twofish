@@ -59,10 +59,10 @@ void key_schedule(Twofish_ctx *ctx, uint8_t key[]) {
 
   // precompute S-boxes for the g function
   for (uint32_t i = 0; i < 256; i++) {
-    ctx->sbox[0][i] = h_func(i, S, k);
-    ctx->sbox[1][i] = h_func(i << 8, S, k);
-    ctx->sbox[2][i] = h_func(i << 16, S, k);
-    ctx->sbox[3][i] = h_func(i << 24, S, k);
+    ctx->sbox[0][i] = h_lane(i, 0, S, k);
+    ctx->sbox[1][i] = h_lane(i, 1,  S, k);
+    ctx->sbox[2][i] = h_lane(i, 2, S, k);
+    ctx->sbox[3][i] = h_lane(i, 3, S, k);
   }
 
   // the expanded key words
