@@ -76,7 +76,7 @@ int main(void)
     phex ("plaintext vector", pt2, 16);
   
     // decrypt/encrypt plaintext
-    twofish_encrypt_block(&ctx, pt1, pt1);
+    twofish_encrypt_block(&ctx, pt1);
   
     phex ("ciphertext vector", ct,  16);
     phex ("ciphertext result", pt1, 16);
@@ -84,7 +84,7 @@ int main(void)
     e=memcmp (pt1, ct, 16)==0;
   
     // decrypt ciphertext
-    twofish_decrypt_block(&ctx, pt1, pt1);
+    twofish_decrypt_block(&ctx, pt1);
     d=memcmp (pt1, pt2, 16)==0;
   
     printf ("\nEncryption test #%i %s\nDecryption test #%i %s\n", 
