@@ -1,13 +1,12 @@
 CC = gcc
 CFLAGS = -Wall -Wextra
 OBJ = math.o key.o twofish.o
-TARGET = twofish
-all: $(TARGET)
+all: twofish test
 
 test: $(OBJ) test.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-$(TARGET): $(OBJ)
+twofish: $(OBJ) main.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 math.o: math.c math.h
@@ -26,4 +25,4 @@ main.o: main.c twofish.h math.h key.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f $(OBJ)
+	rm -f $(OBJ) test.o main.o
