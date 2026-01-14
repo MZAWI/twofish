@@ -120,7 +120,7 @@ uint32_t h_lane(uint8_t x, int lane, const uint32_t L[], int k) {
 
     uint8_t y = x;
 
-    // Apply q-permutations and XORs based on the lane index
+    // apply q-permutations and XORs based on the lane index
     if (k == 4) {
         if (lane == 0 || lane == 3) 
           y = q_perm(y, q1) ^ l[3][lane];
@@ -134,7 +134,7 @@ uint32_t h_lane(uint8_t x, int lane, const uint32_t L[], int k) {
           y = q_perm(y, q0) ^ l[2][lane];
     }
 
-    // Stages k=2 and k=1 (always present)
+    // always present
     switch (lane) {
     case (0):
       y = q_perm(q_perm(q_perm(y, q0) ^ l[1][0], q0) ^ l[0][0], q1);
@@ -150,7 +150,7 @@ uint32_t h_lane(uint8_t x, int lane, const uint32_t L[], int k) {
       break;
     }
 
-    // Multiply the single resulting byte by single column of the MDS matrix
+    // multiply the single resulting byte by single column of the MDS matrix
     uint32_t result = 0;
     for (int i = 0; i < 4; i++) {
         result ^= ((uint32_t)gf_mult(MDS[i][lane], y, MDS_POLYNOMIAL)) << (i * 8);
