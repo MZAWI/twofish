@@ -4,7 +4,7 @@
 typedef struct {
   uint32_t sbox[4][256];
   uint32_t exp_key[40];
-  uint8_t iv[4];
+  uint8_t iv[16];
   int key_len;
   int k;
 } Twofish_ctx;
