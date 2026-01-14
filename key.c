@@ -26,13 +26,13 @@ uint32_t rs_mul_word(const uint8_t key_group[8]) {
 }
 
 // produce expanded key material
-void key_schedule(Twofish_ctx *ctx, uint8_t key[]) {
-  const int k = ctx->key_len / 64;
+void key_schedule(Twofish_ctx *ctx, const uint8_t key[]) {
+  ctx->k = ctx->key_len / 64;
   const uint32_t p = 0x01010101;
 
   // first key conversion
   uint32_t M[8];
-  for (int i = 0; i < 2 * k; i++) {
+  for (int i = 0; i < 2 * ctx->k; i++) {
       M[i] = (
       ((uint32_t) key[4 * i]) |
       ((uint32_t) key[4 * i + 1] << 8 ) |
@@ -45,30 +45,30 @@ void key_schedule(Twofish_ctx *ctx, uint8_t key[]) {
   uint32_t M_e[4];
   uint32_t M_o[4];
 
-  for (int i = 0; i < k; i++) {
+  for (int i = 0; i < ctx->k; i++) {
     M_e[i] = M[2 * i];
     M_o[i] = M[2 * i + 1];
   }
 
   // third word vector S of length k
   // Note that S lists the words in "reverse" order.
-  uint32_t S[k];
-  for (int i = 0; i < k; i++) {
-    S[k - i - 1] = rs_mul_word(&key[i * 8]);
+  uint32_t S[ctx->k];
+  for (int i = 0; i < ctx->k; i++) {
+    S[ctx->k - i - 1] = rs_mul_word(&key[i * 8]);
   }
 
   // precompute S-boxes for the g function
   for (uint32_t i = 0; i < 256; i++) {
-    ctx->sbox[0][i] = h_lane(i, 0, S, k);
-    ctx->sbox[1][i] = h_lane(i, 1,  S, k);
-    ctx->sbox[2][i] = h_lane(i, 2, S, k);
-    ctx->sbox[3][i] = h_lane(i, 3, S, k);
+    ctx->sbox[0][i] = h_lane(i, 0, S, ctx->k);
+    ctx->sbox[1][i] = h_lane(i, 1,  S, ctx->k);
+    ctx->sbox[2][i] = h_lane(i, 2, S, ctx->k);
+    ctx->sbox[3][i] = h_lane(i, 3, S, ctx->k);
   }
 
   // the expanded key words
   for (int i = 0; i < 20; i++) {
-    uint32_t A = h_func(2 * i * p, M_e, k);
-    uint32_t B = h_func((2 * i + 1) * p, M_o, k);
+    uint32_t A = h_func(2 * i * p, M_e, ctx->k);
+    uint32_t B = h_func((2 * i + 1) * p, M_o, ctx->k);
 
     B = ROL32(B, 8);
 
