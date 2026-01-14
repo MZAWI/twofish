@@ -20,7 +20,10 @@ twofish.o: twofish.c twofish.h math.h key.h
 	$(CC) $(CFLAGS) -c $<
 
 test.o: test.c twofish.h math.h key.h
-	$(CC) $(CLAGS) -c $<
+	$(CC) $(CFLAGS) -c $<
+
+main.o: main.c twofish.h math.h key.h
+	$(CC) $(CFLAGS) -c $<
 
 clean:
 	rm -f $(OBJ)
