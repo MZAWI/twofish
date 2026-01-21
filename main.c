@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
     printf("MODE: Decryption\n");
     twofish_decrypt_cbc(&ctx, buffer, (int) file_size, &final_len);
     write_file(outfile, buffer, final_len);
-    printf("Decrypted %d bytes", final_len);
+    printf("Decrypted %d bytes\n", final_len);
     break;
   }
   
