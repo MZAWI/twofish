@@ -5,7 +5,7 @@ Implementation of twofish encryption algorithm in C. Twofish is a 128-bit block 
 # Building
 
 To build this project, simply use `make` command. You can specify arguments like `clean` to remove *.o files and `twofish` or `test` to build individual programs.
-To build the project, you will need compiler, make and standard headers.
+You will need compiler, make and standard headers.
 
 # Usage
 
